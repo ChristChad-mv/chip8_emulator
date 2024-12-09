@@ -6,15 +6,15 @@
 ProjectName            :=chip_8
 ConfigurationName      :=Debug
 WorkspaceConfiguration := $(ConfigurationName)
-WorkspacePath          :=/home/administrateur/Documents/projet
-ProjectPath            :=/home/administrateur/Documents/projet/chip_8
+WorkspacePath          :=/home/administrateur/Téléchargements/chip8_emulator
+ProjectPath            :=/home/administrateur/Téléchargements/chip8_emulator/chip_8
 IntermediateDirectory  :=../build-$(ConfigurationName)/chip_8
 OutDir                 :=../build-$(ConfigurationName)/chip_8
 CurrentFileName        :=
 CurrentFilePath        :=
 CurrentFileFullPath    :=
 User                   :=administrateur
-Date                   :=02/12/24
+Date                   :=09/12/24
 CodeLitePath           :=/home/administrateur/.codelite
 LinkerName             :=gcc
 SharedObjectLinkerName :=gcc -shared -fPIC
@@ -60,7 +60,7 @@ AS       := as
 ## User defined environment variables
 ##
 CodeLiteDir:=/usr/share/codelite
-Objects0=../build-$(ConfigurationName)/chip_8/src_exemple.c$(ObjectSuffix) 
+Objects0=../build-$(ConfigurationName)/chip_8/src_ram.c$(ObjectSuffix) ../build-$(ConfigurationName)/chip_8/src_main.c$(ObjectSuffix) 
 
 
 
@@ -91,13 +91,21 @@ PreBuild:
 ##
 ## Objects
 ##
-../build-$(ConfigurationName)/chip_8/src_exemple.c$(ObjectSuffix): src/exemple.c ../build-$(ConfigurationName)/chip_8/src_exemple.c$(DependSuffix)
-	$(CC) $(SourceSwitch) "/home/administrateur/Documents/projet/chip_8/src/exemple.c" $(CFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/src_exemple.c$(ObjectSuffix) $(IncludePath)
-../build-$(ConfigurationName)/chip_8/src_exemple.c$(DependSuffix): src/exemple.c
-	@$(CC) $(CFLAGS) $(IncludePath) -MG -MP -MT../build-$(ConfigurationName)/chip_8/src_exemple.c$(ObjectSuffix) -MF../build-$(ConfigurationName)/chip_8/src_exemple.c$(DependSuffix) -MM src/exemple.c
+../build-$(ConfigurationName)/chip_8/src_ram.c$(ObjectSuffix): src/ram.c ../build-$(ConfigurationName)/chip_8/src_ram.c$(DependSuffix)
+	$(CC) $(SourceSwitch) "/home/administrateur/Téléchargements/chip8_emulator/chip_8/src/ram.c" $(CFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/src_ram.c$(ObjectSuffix) $(IncludePath)
+../build-$(ConfigurationName)/chip_8/src_ram.c$(DependSuffix): src/ram.c
+	@$(CC) $(CFLAGS) $(IncludePath) -MG -MP -MT../build-$(ConfigurationName)/chip_8/src_ram.c$(ObjectSuffix) -MF../build-$(ConfigurationName)/chip_8/src_ram.c$(DependSuffix) -MM src/ram.c
 
-../build-$(ConfigurationName)/chip_8/src_exemple.c$(PreprocessSuffix): src/exemple.c
-	$(CC) $(CFLAGS) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) ../build-$(ConfigurationName)/chip_8/src_exemple.c$(PreprocessSuffix) src/exemple.c
+../build-$(ConfigurationName)/chip_8/src_ram.c$(PreprocessSuffix): src/ram.c
+	$(CC) $(CFLAGS) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) ../build-$(ConfigurationName)/chip_8/src_ram.c$(PreprocessSuffix) src/ram.c
+
+../build-$(ConfigurationName)/chip_8/src_main.c$(ObjectSuffix): src/main.c ../build-$(ConfigurationName)/chip_8/src_main.c$(DependSuffix)
+	$(CC) $(SourceSwitch) "/home/administrateur/Téléchargements/chip8_emulator/chip_8/src/main.c" $(CFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/src_main.c$(ObjectSuffix) $(IncludePath)
+../build-$(ConfigurationName)/chip_8/src_main.c$(DependSuffix): src/main.c
+	@$(CC) $(CFLAGS) $(IncludePath) -MG -MP -MT../build-$(ConfigurationName)/chip_8/src_main.c$(ObjectSuffix) -MF../build-$(ConfigurationName)/chip_8/src_main.c$(DependSuffix) -MM src/main.c
+
+../build-$(ConfigurationName)/chip_8/src_main.c$(PreprocessSuffix): src/main.c
+	$(CC) $(CFLAGS) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) ../build-$(ConfigurationName)/chip_8/src_main.c$(PreprocessSuffix) src/main.c
 
 
 -include ../build-$(ConfigurationName)/chip_8//*$(DependSuffix)

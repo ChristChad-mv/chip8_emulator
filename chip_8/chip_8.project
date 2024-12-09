@@ -5,8 +5,8 @@
     <File Name="include/ram.h"/>
   </VirtualDirectory>
   <VirtualDirectory Name="src">
+    <File Name="src/main.c"/>
     <File Name="src/ram.c"/>
-    <File Name="src/exemple.c"/>
   </VirtualDirectory>
   <Description/>
   <Dependencies/>
