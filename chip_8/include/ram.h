@@ -5,7 +5,7 @@ struct ram {
 	unit8_t *memory;
 };
 
-int initialize_RAM(struct ram* memory);
+int initialize_RAM();
 void delete_memory(struct ram* memory);
 int read_memory(struct ram* memory, unit16_t address, unit8_t* res);
 int write_memory(struct ram* memory, unit16_t address, unit8_t value);
