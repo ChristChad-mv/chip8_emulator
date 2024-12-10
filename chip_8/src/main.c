@@ -22,6 +22,8 @@
 #include "ram.h"
 
 int main() {
+	
+		// 1. créer mémoire : OK
         struct ram Ram;
 		int checking= initialize_RAM(&Ram);
 		if (checking == 1) {
@@ -29,5 +31,22 @@ int main() {
 		} 
 		
 		load_memory(&Ram, 512,"/home/administrateur/Téléchargements/chip8_emulator/chip_8/1-chip8-logo.ch8");
+		
+		// 2. créer un display : à faire
+		// Display_init
+		struct Display display;
+		if (!Display_init(&display, 10)) {
+                printf("Display initialized.\n");
+		}
+
+		
+		// 3. créer et initialiser proc
+		// proc = ...
+		
+		// 4. appeler fetch decode execute indéfiniment
+		// while (1)
+		//		fetch_decode_execute(proc);
+		
+		
 		return 0;
 }

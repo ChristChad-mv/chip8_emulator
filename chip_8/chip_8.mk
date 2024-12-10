@@ -6,15 +6,15 @@
 ProjectName            :=chip_8
 ConfigurationName      :=Debug
 WorkspaceConfiguration := $(ConfigurationName)
-WorkspacePath          :=/home/administrateur/Téléchargements/chip8_emulator
+WorkspacePath          :=/home/administrateur/Documents/Chip
 ProjectPath            :=/home/administrateur/Téléchargements/chip8_emulator/chip_8
-IntermediateDirectory  :=../build-$(ConfigurationName)/chip_8
-OutDir                 :=../build-$(ConfigurationName)/chip_8
+IntermediateDirectory  :=../../../Documents/Chip/build-$(ConfigurationName)/__/__/Téléchargements/chip8_emulator/chip_8
+OutDir                 :=../../../Documents/Chip/build-$(ConfigurationName)/__/__/Téléchargements/chip8_emulator/chip_8
 CurrentFileName        :=
 CurrentFilePath        :=
 CurrentFileFullPath    :=
 User                   :=administrateur
-Date                   :=09/12/24
+Date                   :=10/12/24
 CodeLitePath           :=/home/administrateur/.codelite
 LinkerName             :=gcc
 SharedObjectLinkerName :=gcc -shared -fPIC
@@ -28,7 +28,7 @@ OutputSwitch           :=-o
 LibraryPathSwitch      :=-L
 PreprocessorSwitch     :=-D
 SourceSwitch           :=-c 
-OutputFile             :=../build-$(ConfigurationName)/bin/$(ProjectName)
+OutputFile             :=../../../Documents/Chip/build-$(ConfigurationName)/bin/$(ProjectName)
 Preprocessors          :=
 ObjectSwitch           :=-o 
 ArchiveOutputSwitch    := 
@@ -60,7 +60,7 @@ AS       := as
 ## User defined environment variables
 ##
 CodeLiteDir:=/usr/share/codelite
-Objects0=../build-$(ConfigurationName)/chip_8/src_ram.c$(ObjectSuffix) ../build-$(ConfigurationName)/chip_8/src_main.c$(ObjectSuffix) 
+Objects0=../../../Documents/Chip/build-$(ConfigurationName)/__/__/Téléchargements/chip8_emulator/chip_8/src_ram.c$(ObjectSuffix) ../../../Documents/Chip/build-$(ConfigurationName)/__/__/Téléchargements/chip8_emulator/chip_8/src_main.c$(ObjectSuffix) 
 
 
 
@@ -72,18 +72,18 @@ Objects=$(Objects0)
 .PHONY: all clean PreBuild PrePreBuild PostBuild MakeIntermediateDirs
 all: MakeIntermediateDirs $(OutputFile)
 
-$(OutputFile): ../build-$(ConfigurationName)/chip_8/.d $(Objects) 
-	@mkdir -p "../build-$(ConfigurationName)/chip_8"
+$(OutputFile): ../../../Documents/Chip/build-$(ConfigurationName)/__/__/Téléchargements/chip8_emulator/chip_8/.d $(Objects) 
+	@mkdir -p "../../../Documents/Chip/build-$(ConfigurationName)/__/__/Téléchargements/chip8_emulator/chip_8"
 	@echo "" > $(IntermediateDirectory)/.d
 	@echo $(Objects0)  > $(ObjectsFileList)
 	$(LinkerName) $(OutputSwitch)$(OutputFile) @$(ObjectsFileList) $(LibPath) $(Libs) $(LinkOptions)
 
 MakeIntermediateDirs:
-	@mkdir -p "../build-$(ConfigurationName)/chip_8"
-	@mkdir -p ""../build-$(ConfigurationName)/bin""
+	@mkdir -p "../../../Documents/Chip/build-$(ConfigurationName)/__/__/Téléchargements/chip8_emulator/chip_8"
+	@mkdir -p ""../../../Documents/Chip/build-$(ConfigurationName)/bin""
 
-../build-$(ConfigurationName)/chip_8/.d:
-	@mkdir -p "../build-$(ConfigurationName)/chip_8"
+../../../Documents/Chip/build-$(ConfigurationName)/__/__/Téléchargements/chip8_emulator/chip_8/.d:
+	@mkdir -p "../../../Documents/Chip/build-$(ConfigurationName)/__/__/Téléchargements/chip8_emulator/chip_8"
 
 PreBuild:
 
@@ -91,24 +91,24 @@ PreBuild:
 ##
 ## Objects
 ##
-../build-$(ConfigurationName)/chip_8/src_ram.c$(ObjectSuffix): src/ram.c ../build-$(ConfigurationName)/chip_8/src_ram.c$(DependSuffix)
+../../../Documents/Chip/build-$(ConfigurationName)/__/__/Téléchargements/chip8_emulator/chip_8/src_ram.c$(ObjectSuffix): src/ram.c ../../../Documents/Chip/build-$(ConfigurationName)/__/__/Téléchargements/chip8_emulator/chip_8/src_ram.c$(DependSuffix)
 	$(CC) $(SourceSwitch) "/home/administrateur/Téléchargements/chip8_emulator/chip_8/src/ram.c" $(CFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/src_ram.c$(ObjectSuffix) $(IncludePath)
-../build-$(ConfigurationName)/chip_8/src_ram.c$(DependSuffix): src/ram.c
-	@$(CC) $(CFLAGS) $(IncludePath) -MG -MP -MT../build-$(ConfigurationName)/chip_8/src_ram.c$(ObjectSuffix) -MF../build-$(ConfigurationName)/chip_8/src_ram.c$(DependSuffix) -MM src/ram.c
+../../../Documents/Chip/build-$(ConfigurationName)/__/__/Téléchargements/chip8_emulator/chip_8/src_ram.c$(DependSuffix): src/ram.c
+	@$(CC) $(CFLAGS) $(IncludePath) -MG -MP -MT../../../Documents/Chip/build-$(ConfigurationName)/__/__/Téléchargements/chip8_emulator/chip_8/src_ram.c$(ObjectSuffix) -MF../../../Documents/Chip/build-$(ConfigurationName)/__/__/Téléchargements/chip8_emulator/chip_8/src_ram.c$(DependSuffix) -MM src/ram.c
 
-../build-$(ConfigurationName)/chip_8/src_ram.c$(PreprocessSuffix): src/ram.c
-	$(CC) $(CFLAGS) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) ../build-$(ConfigurationName)/chip_8/src_ram.c$(PreprocessSuffix) src/ram.c
+../../../Documents/Chip/build-$(ConfigurationName)/__/__/Téléchargements/chip8_emulator/chip_8/src_ram.c$(PreprocessSuffix): src/ram.c
+	$(CC) $(CFLAGS) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) ../../../Documents/Chip/build-$(ConfigurationName)/__/__/Téléchargements/chip8_emulator/chip_8/src_ram.c$(PreprocessSuffix) src/ram.c
 
-../build-$(ConfigurationName)/chip_8/src_main.c$(ObjectSuffix): src/main.c ../build-$(ConfigurationName)/chip_8/src_main.c$(DependSuffix)
+../../../Documents/Chip/build-$(ConfigurationName)/__/__/Téléchargements/chip8_emulator/chip_8/src_main.c$(ObjectSuffix): src/main.c ../../../Documents/Chip/build-$(ConfigurationName)/__/__/Téléchargements/chip8_emulator/chip_8/src_main.c$(DependSuffix)
 	$(CC) $(SourceSwitch) "/home/administrateur/Téléchargements/chip8_emulator/chip_8/src/main.c" $(CFLAGS) $(ObjectSwitch)$(IntermediateDirectory)/src_main.c$(ObjectSuffix) $(IncludePath)
-../build-$(ConfigurationName)/chip_8/src_main.c$(DependSuffix): src/main.c
-	@$(CC) $(CFLAGS) $(IncludePath) -MG -MP -MT../build-$(ConfigurationName)/chip_8/src_main.c$(ObjectSuffix) -MF../build-$(ConfigurationName)/chip_8/src_main.c$(DependSuffix) -MM src/main.c
+../../../Documents/Chip/build-$(ConfigurationName)/__/__/Téléchargements/chip8_emulator/chip_8/src_main.c$(DependSuffix): src/main.c
+	@$(CC) $(CFLAGS) $(IncludePath) -MG -MP -MT../../../Documents/Chip/build-$(ConfigurationName)/__/__/Téléchargements/chip8_emulator/chip_8/src_main.c$(ObjectSuffix) -MF../../../Documents/Chip/build-$(ConfigurationName)/__/__/Téléchargements/chip8_emulator/chip_8/src_main.c$(DependSuffix) -MM src/main.c
 
-../build-$(ConfigurationName)/chip_8/src_main.c$(PreprocessSuffix): src/main.c
-	$(CC) $(CFLAGS) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) ../build-$(ConfigurationName)/chip_8/src_main.c$(PreprocessSuffix) src/main.c
+../../../Documents/Chip/build-$(ConfigurationName)/__/__/Téléchargements/chip8_emulator/chip_8/src_main.c$(PreprocessSuffix): src/main.c
+	$(CC) $(CFLAGS) $(IncludePath) $(PreprocessOnlySwitch) $(OutputSwitch) ../../../Documents/Chip/build-$(ConfigurationName)/__/__/Téléchargements/chip8_emulator/chip_8/src_main.c$(PreprocessSuffix) src/main.c
 
 
--include ../build-$(ConfigurationName)/chip_8//*$(DependSuffix)
+-include ../../../Documents/Chip/build-$(ConfigurationName)/__/__/Téléchargements/chip8_emulator/chip_8//*$(DependSuffix)
 ##
 ## Clean
 ##

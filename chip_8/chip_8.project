@@ -2,9 +2,11 @@
 <CodeLite_Project Name="chip_8" Version="11000" InternalType="Console">
   <VirtualDirectory Name="lib"/>
   <VirtualDirectory Name="include">
+    <File Name="include/processor.h"/>
     <File Name="include/ram.h"/>
   </VirtualDirectory>
   <VirtualDirectory Name="src">
+    <File Name="src/processor.c"/>
     <File Name="src/main.c"/>
     <File Name="src/ram.c"/>
   </VirtualDirectory>
