@@ -47,5 +47,22 @@ int initialize_processor(struct processor * proc, struct ram* memory, struct Dis
  * @param proc Pointer to the processor structure.
  */
 void fetch_decode_execute(struct processor* proc) {
-    
+    uint16_t instruction_fetched = fetch_instruction(&proc);
+	
+}
+
+uint16_t fetch_instruction(struct processor* proc) {
+	
+	uint8_t instruction_part_1, instruction_part_2;
+	
+	if(read_memory(proc->ram, proc->counter_program, instruction_part_1) != 0 || 
+		read_memory(proc->ram, proc->counter_program + 1, instruction_part_2) != 0) {
+			return 1;
+	}
+	
+	uint16_t instruction = instruction_part_1;
+	instruction << 8;
+	instruction = instruction | instruction_part_2;
+	
+	return instruction;
 }

@@ -58,4 +58,7 @@ int initialize_processor(struct processor * proc, struct ram* memory, struct Dis
 void fetch_decode_execute(struct processor* proc);
 
 
+uint16_t fetch_instruction(struct processor* proc);
+
+
 #endif 
