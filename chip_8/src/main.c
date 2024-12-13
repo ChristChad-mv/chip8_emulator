@@ -70,10 +70,10 @@ int main() {
      */
     struct Display display;
     if (Display_init(&display, 10)) {
-        printf("Display initialized successfully.\n");
-    } else {
         printf("Failed to initialize display.\n");
         return 1; 
+    } else {
+        printf("Display initialized successfully.\n");
     }
 
     /**
@@ -86,6 +86,16 @@ int main() {
         delete_memory(&Ram);
         return 1;
     }
+	else {
+		printf("Proc initialized successfully.\n");
+	}
+	
+	for(int i = 0; i < 60; ++i) {
+		fetch_decode_execute(&proc);
+		Display_update(&display);
+	}
+	
+	while(1);
     
     
     return 0;
