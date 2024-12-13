@@ -3,8 +3,7 @@
  * @brief Memory management for the Chip8 emulator.
  *
  * This module provides functions to initialize, free, read from, and write to
- * the RAM used by the Chip8 emulator. It also includes functionality to load
- * programs from binary files into memory.
+ * the RAM. It also includes functionality to load programs from binary files into memory.
  */
 
 #include <stdio.h>
@@ -17,10 +16,10 @@
  *
  * Allocates 4096 bytes of memory for the RAM structure.
  *
- * @param memory Pointer to the RAM structure to be initialized.
+ * @param memory pointer to the RAM structure to be initialized.
  * @return 
  *      - 0 if initialization is successful.
- *      - 1 if memory allocation fails.
+ *      - 1 if failed.
  */
 int initialize_RAM(struct ram* memory) {
     memory->memory = calloc(4096, sizeof(uint8_t));
@@ -67,7 +66,7 @@ int read_memory(struct ram* memory, uint16_t address, uint8_t* res){
 /**
  * @brief Writes a value to a specific address in RAM.
  *
- * Checks that the address is valid (less than 4096) before writing the value.
+ * Checks that the address is valid before writing the value.
  *
  * @param memory Pointer to the RAM structure.
  * @param address Memory address to write to.
@@ -87,11 +86,12 @@ int write_memory(struct ram* memory, uint16_t address, uint8_t value){
 /**
  * @brief Loads a binary file into RAM starting from a specified address.
  *
- * Opens the file in binary mode and reads two bytes at a time, writing them into memory
+ * Opens the file in binary mode and reads two bytes at a time before writing them into memory
  *
  * @param memory Pointer to the RAM structure.
  * @param address Starting memory address where the file will be loaded.
  * @param filename Name of the binary file to load.
+ * 
  * @return 
  *      - 0 if the loading is successful.
  *      - 1 if the file cannot be opened or if a memory write fails.
@@ -110,11 +110,13 @@ int load_memory(struct ram* memory, uint16_t address, const char* filename) {
             fclose(id_file); 
             return 1;
         } 
+		
         check = write_memory(memory, address++, content_file[1]);
         if(check == 1) {
             fclose(id_file);
             return 1;
         } 
+		
         uint16_t instruction = content_file[0];
         instruction = instruction << 8;
         instruction = instruction | content_file[1];
