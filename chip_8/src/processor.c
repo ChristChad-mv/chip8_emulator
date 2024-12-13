@@ -11,6 +11,8 @@
 #include "processor.h"
 #include "ram.h"
 #include <display/display.h>
+#include <display/sprite.h>
+#include <misc/debug.h>
 
 /**
  * @brief Initializes the processor.
@@ -46,23 +48,82 @@ int initialize_processor(struct processor * proc, struct ram* memory, struct Dis
  *
  * @param proc Pointer to the processor structure.
  */
-void fetch_decode_execute(struct processor* proc) {
-    uint16_t instruction_fetched = fetch_instruction(&proc);
-	
-}
 
 uint16_t fetch_instruction(struct processor* proc) {
 	
 	uint8_t instruction_part_1, instruction_part_2;
 	
-	if(read_memory(proc->ram, proc->counter_program, instruction_part_1) != 0 || 
-		read_memory(proc->ram, proc->counter_program + 1, instruction_part_2) != 0) {
+	if(read_memory(proc->ram, proc->counter_program, &instruction_part_1) != 0 || 
+		read_memory(proc->ram, proc->counter_program + 1, &instruction_part_2) != 0) {
 			return 1;
 	}
 	
+	proc->counter_program += 2;
+	
 	uint16_t instruction = instruction_part_1;
-	instruction << 8;
+	instruction = instruction << 8;
 	instruction = instruction | instruction_part_2;
 	
 	return instruction;
+} 
+
+void fetch_decode_execute(struct processor* proc) {
+    uint16_t instruction_fetched = fetch_instruction(proc);
+	printf("%s\n", instruction_as_str(instruction_fetched));
+	
+	
+	if ((instruction_fetched & 0xF000) == 0x6000) {
+		printf("6xkk\n");
+		uint8_t x  = ( instruction_fetched & 0x0F00 ) >> 8;
+		uint8_t kk = instruction_fetched & 0x00FF;
+		proc->Vx[x] = kk;
+	}
+	else if ( (instruction_fetched & 0xF000) == 0xA000 ) {
+		printf("Annn\n");
+		
+		uint16_t n = instruction_fetched & 0x0FFF;
+		proc->registerI=n;
+		
+	}
+	else if ( (instruction_fetched & 0xF000) == 0x1000 ) {
+		printf("1nnn\n");
+		
+		uint8_t n = instruction_fetched & 0x0FFF;
+		proc->counter_program = n;
+		
+	} 
+	else if ( (instruction_fetched & 0xF000) == 0xD000) {
+		printf("Dxyn\n");
+		
+		uint8_t x = ( instruction_fetched & 0x0F00 ) >> 8;
+		uint8_t y = ( instruction_fetched & 0x00F0) >> 4;
+		uint8_t n = instruction_fetched & 0x000F;
+		
+		uint8_t Vx = proc->Vx[x];
+		uint8_t Vy = proc->Vx[y];
+		
+		struct Sprite sprite;
+		Sprite_init(&sprite, n);
+		
+		for(uint8_t i = 0; i < n; i++) {
+			uint8_t byte;
+			read_memory(proc->ram, proc->registerI + i, &byte);
+			Sprite_add(&sprite, byte);
+		}
+		Display_DRW(proc->display, &sprite, Vx, Vy, &proc->Vx[0xF]);
+		Sprite_destroy(&sprite);
+		
+	} else if ( instruction_fetched == 0x00E0) {
+		printf("00E0\n");
+		Display_CLS(proc->display);
+	}
+	else {
+		printf("ERROR\n");
+	}
+	
+
 }
+
+
+
+
