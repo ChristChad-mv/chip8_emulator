@@ -33,14 +33,13 @@ int initialize_processor(struct processor * proc, struct ram* memory, struct Dis
     proc->registerI = 0; 
     proc->counter_program = 512;
     proc->stack_pointer = 0;
+	
 	for(int i=0; i < 16; i++) {
 		proc->Vx[i] = 0;
 		proc->stack[i] = 0;
 	}
-	
 	return 0;
 }
-
 /**
  * @brief Fetches, decodes, and executes the next instruction.
  *
@@ -120,6 +119,11 @@ void fetch_decode_execute(struct processor* proc) {
 		Display_CLS(proc->display);
 		
 	} 
+	else if ( instruction_fetched == 0x00EE) {
+		printf("00EE\n");
+		proc->counter_program = proc->stack[proc->stack_pointer];
+		proc->stack[proc->stack_pointer] -= 1;
+	} 
 	else if  ( (instruction_fetched & 0xF000)== 0x7000){
 		printf("7xkk");
 		uint8_t x= ( instruction_fetched & 0x0F00) >> 8; 
@@ -142,7 +146,6 @@ void fetch_decode_execute(struct processor* proc) {
 		
 		proc->stack[proc->stack_pointer] = proc->counter_program;
 		proc->counter_program = n;
-		proc->counter_program = proc->stack[proc->stack_pointer];
 	}
 	else if ( (instruction_fetched & 0xF000) == 0x4000 ) {
 		printf("4xnn");
@@ -154,6 +157,7 @@ void fetch_decode_execute(struct processor* proc) {
 	}
 	else if ( (instruction_fetched & 0xF000) == 0x5000) {
 		printf("5xy0\n");
+
 		
 		uint8_t x = ( instruction_fetched & 0x0F00 ) >> 8;
 		uint8_t y = ( instruction_fetched & 0x00F0) >> 4;
@@ -166,15 +170,47 @@ void fetch_decode_execute(struct processor* proc) {
 		}
 	}
 	else if ( ( instruction_fetched & 0xF000) == 0x8000) {
+		printf ("8xy0\n");
+		
+		uint8_t x = ( instruction_fetched & 0x0F00 ) >> 8;
+		uint8_t y = ( instruction_fetched & 0x00F0) >> 4;
+
+		uint8_t Vy = proc->Vx[y];
+		
+		proc->Vx[x] = Vy;
+	}
+	else if ( ( instruction_fetched & 0xF000) == 0x8000) {
+		
+		//// TODOOOO
+		printf ("8xy1\n");
+		
+		uint8_t x = ( instruction_fetched & 0x0F00 ) >> 8;
+		uint8_t y = ( instruction_fetched & 0x00F0) >> 4;
+
+		
+		uint8_t Vy = proc->Vx[y];
+		
+		proc->Vx[x] |= Vy;		
+	}
+	else if(( instruction_fetched & 0xF000) == 0x8000) {
+		/////////////////// TODO
 		printf ("8xy4\n");
+		
 		uint8_t x = ( instruction_fetched & 0x0F00 ) >> 8;
 		uint8_t y = ( instruction_fetched & 0x00F0) >> 4;
 		
 		uint8_t Vx = proc->Vx[x];
 		uint8_t Vy = proc->Vx[y];
+//		uint8_t Vf = proc->Vx[0xF]; // c'est le registre numero 15=F
 		
+		Vx = (uint16_t)(Vx + Vy);
 		
-		
+		if (Vx > 255) {
+			proc->Vx[0xF] = 1;
+		} else {
+			proc->Vx[0xF] = 0;
+		}
+		Vx= (uint8_t) (Vx - Vy);
 	}
 	else {
 		printf("ERROR\n");

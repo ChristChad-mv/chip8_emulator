@@ -32,7 +32,9 @@ struct processor {
     struct Display* display;   
     uint16_t registerI;        
     int counter_program;       
-    uint8_t Vx[16];           
+    uint8_t Vx[16];
+	uint16_t stack[16];
+	int stack_pointer;
 };
 
 /**

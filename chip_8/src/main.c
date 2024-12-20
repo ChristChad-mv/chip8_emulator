@@ -90,12 +90,10 @@ int main() {
 		printf("Proc initialized successfully.\n");
 	}
 	
-	for(int i = 0; i < 60; ++i) {
+	while(1) {
 		fetch_decode_execute(&proc);
 		Display_update(&display);
 	}
-	
-	while(1);
     
     
     return 0;
