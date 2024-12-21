@@ -170,47 +170,127 @@ void fetch_decode_execute(struct processor* proc) {
 		}
 	}
 	else if ( ( instruction_fetched & 0xF000) == 0x8000) {
-		printf ("8xy0\n");
 		
 		uint8_t x = ( instruction_fetched & 0x0F00 ) >> 8;
 		uint8_t y = ( instruction_fetched & 0x00F0) >> 4;
-
-		uint8_t Vy = proc->Vx[y];
-		
-		proc->Vx[x] = Vy;
-	}
-	else if ( ( instruction_fetched & 0xF000) == 0x8000) {
-		
-		//// TODOOOO
-		printf ("8xy1\n");
-		
-		uint8_t x = ( instruction_fetched & 0x0F00 ) >> 8;
-		uint8_t y = ( instruction_fetched & 0x00F0) >> 4;
-
-		
-		uint8_t Vy = proc->Vx[y];
-		
-		proc->Vx[x] |= Vy;		
-	}
-	else if(( instruction_fetched & 0xF000) == 0x8000) {
-		/////////////////// TODO
-		printf ("8xy4\n");
-		
-		uint8_t x = ( instruction_fetched & 0x0F00 ) >> 8;
-		uint8_t y = ( instruction_fetched & 0x00F0) >> 4;
-		
-		uint8_t Vx = proc->Vx[x];
-		uint8_t Vy = proc->Vx[y];
-//		uint8_t Vf = proc->Vx[0xF]; // c'est le registre numero 15=F
-		
-		Vx = (uint16_t)(Vx + Vy);
-		
-		if (Vx > 255) {
-			proc->Vx[0xF] = 1;
-		} else {
-			proc->Vx[0xF] = 0;
-		}
-		Vx= (uint8_t) (Vx - Vy);
+        
+        uint8_t Vy = proc->Vx[y];
+        uint8_t Vx = proc->Vx[x];
+        // pour eviter une confusion puisque la partie 8xy est la meme
+        // on utilise un case of 
+        
+        switch (instruction_fetched & 0x000F) {
+            
+            case 0x0:
+                printf("8xy0\n");
+                proc->Vx[x] = Vy;
+                break;
+            case 0x1:
+                printf("8xy1\n");
+                proc->Vx[x] |= Vy;	
+                break;
+            case 0x2:
+                printf("8xy2\n");
+                proc->Vx[x] &= Vy;  
+                break;
+            case 0x3:
+                printf("8xy3\n");
+                proc->Vx[x] ^= Vy;   
+                break;
+            case 0x4:
+                printf("8xy4\n");
+                //uint8_t Vf = proc->Vx[0xF]; // c'est le registre numero 15=F
+ 
+                uint16_t sum = (uint16_t)proc->Vx[x] + proc->Vx[y];
+                proc->Vx[x] = (uint8_t)sum;
+                if ( sum > 255) {
+                        proc->Vx[0xF] = 1;
+                } else {
+                    proc->Vx[0xF] = 0;
+                }
+               
+                break;
+            case 0x5:
+                printf("8xy5\n");
+                if (Vx >Vy) {
+                    proc ->Vx[0XF]=1;
+                } else {
+                    proc ->Vx[0XF]=0;
+                }
+                proc->Vx[x] -= Vy;  
+                break;
+            case 0x6:
+                printf("8xy6\n");
+                
+                proc->Vx[0xF] = proc->Vx[x] & 0x1;   // on recupere le bit le moins significatif
+                proc->Vx[x] >>= 1;  //devision par 2
+                break;
+            case 0x7:
+                printf("8xy7\n");
+                if ( Vx < Vy) {
+                    proc -> Vx[0XF]= 1;
+                } else {
+                    proc -> Vx[0XF]=0;
+                }
+                proc->Vx[x] = proc->Vx[y] - proc->Vx[x]; 
+                break;
+            case 0xE : 
+               // inverse de 8xy6 
+                printf("8xyE\n");
+                proc->Vx[0xF] = (proc->Vx[x] & 0x80) >> 7; // recupere le bit le plus significatif et le met dans vf
+                proc->Vx[x] <<= 1;  //multiplie par deux 
+        }
+    }
+    else if ( (instruction_fetched & 0xF000) == 0xF000 ) {
+		printf("Fxnn");
+        uint8_t x = ( instruction_fetched & 0x0F00 ) >> 8;
+		//uint8_t y = ( instruction_fetched & 0x00F0) >> 4;
+        
+        //uint8_t Vy = proc->Vx[y];
+        uint8_t Vx = proc->Vx[x];
+        
+        switch (instruction_fetched & 0x00FF) {
+            
+            case 0X55:
+            printf("FX55\n");
+            for (uint8_t i = 0; i <= x; i++) {
+                write_memory(proc->ram, proc->registerI + i, proc->Vx[i]);
+            }
+            proc->registerI += x + 1;   
+            break;
+            
+            case 0X65 : 
+            printf ("FX65\n");
+            for (uint8_t i = 0; i <= x; i++) {
+                uint8_t value;
+                read_memory(proc->ram, proc->registerI + i, &value);
+                proc ->Vx[i]=value;
+            }
+            proc->registerI += x + 1;   
+            break;
+            case 0X33 : 
+             printf("FX33\n");
+             // ne marche pas !!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            // on decortique l'adresse en dizaines unités et centaines et on sauvgarde dans registrI
+            // registerI+1 et I+2 d'ou l'incrementation de 3
+            uint8_t hundreds = (uint8_t)(Vx / 100);
+            uint8_t tens = (uint8_t)((Vx / 10) % 10);
+            uint8_t ones = (uint8_t)(Vx % 10);
+            
+            write_memory(proc->ram, proc->registerI,hundreds);           
+            write_memory(proc->ram, proc->registerI+1,tens);  
+            write_memory(proc->ram, proc->registerI+2, ones);        
+            
+            proc->registerI += 3;   
+            break;
+            
+            case 0X1E : 
+            printf("FX1E\n");
+            proc->registerI = proc->registerI + Vx;
+            
+            break; 
+             
+        }
 	}
 	else {
 		printf("ERROR\n");
