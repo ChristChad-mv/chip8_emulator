@@ -58,7 +58,7 @@ int main() {
      * Load CHIP-8 program into memory.
      * Loads a binary CHIP-8 program from the specified file into RAM starting at address 512.
      */
-    const char* program_path = "/home/administrateur/Téléchargements/chip8_emulator/chip_8/3-corax+.ch8";
+    const char* program_path = "/home/radiamerabtene/Téléchargements/chip8_emulator/chip_8/3-corax+.ch8";
     if (load_memory(&Ram, 512, program_path) != 0) {
         printf("Failed to load program into memory.\n");
         return 1;
