@@ -11,6 +11,7 @@
 
 #include "ram.h"
 #include <display/display.h>
+#include <keyboard/keyboard.h>
 #include <stdint.h>
 
 /**
@@ -35,6 +36,7 @@ struct processor {
     uint8_t Vx[16];
 	uint16_t stack[16];
 	int stack_pointer;
+	uint8_t delay_timer;
 };
 
 /**
@@ -57,10 +59,8 @@ int initialize_processor(struct processor * proc, struct ram* memory, struct Dis
  *
  * @param proc pointer to the processor structure.
  */
-void fetch_decode_execute(struct processor* proc);
-
-
 uint16_t fetch_instruction(struct processor* proc);
+void decode_execute(struct processor* proc);
 
 
 #endif 

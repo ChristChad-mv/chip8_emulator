@@ -24,6 +24,7 @@
  * This file contains the main function in which we will manipulate every others functions.
  */
 
+#include <keyboard/keyboard.h>
 #include <display/display.h>
 #include <misc/debug.h>
 #include "ram.h"
@@ -49,6 +50,8 @@ int main() {
      */
     struct ram Ram;
     int checking = initialize_RAM(&Ram);
+	
+	write_memory(&Ram, 511, 1);
     if (checking == 1) {
         printf("RAM not initialized.\n");
         return 1;
@@ -58,7 +61,7 @@ int main() {
      * Load CHIP-8 program into memory.
      * Loads a binary CHIP-8 program from the specified file into RAM starting at address 512.
      */
-    const char* program_path = "/home/radiamerabtene/Téléchargements/chip8_emulator/chip_8/3-corax+.ch8";
+    const char* program_path = "/home/administrateur/Téléchargements/chip8_emulator/chip_8/5-quirks.ch8";
     if (load_memory(&Ram, 512, program_path) != 0) {
         printf("Failed to load program into memory.\n");
         return 1;
@@ -91,7 +94,7 @@ int main() {
 	}
 	
 	while(1) {
-		fetch_decode_execute(&proc);
+		decode_execute(&proc);
 		Display_update(&display);
 	}
     

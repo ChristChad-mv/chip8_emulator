@@ -35,6 +35,7 @@ int initialize_processor(struct processor * proc, struct ram* memory, struct Dis
     proc->registerI = 0; 
     proc->counter_program = 512;
     proc->stack_pointer = 0;
+	proc->delay_timer = 0;
 	
 	for(int i=0; i < 16; i++) {
 		proc->Vx[i] = 0;
@@ -69,7 +70,7 @@ uint16_t fetch_instruction(struct processor* proc) {
 	return instruction;
 } 
 
-void fetch_decode_execute(struct processor* proc) {
+void decode_execute(struct processor* proc) {
     uint16_t instruction_fetched = fetch_instruction(proc);
 	printf("%s\n", instruction_as_str(instruction_fetched));
 	
@@ -95,6 +96,7 @@ void fetch_decode_execute(struct processor* proc) {
 	} 
 	else if ( (instruction_fetched & 0xF000) == 0xD000) {
 		printf("Dxyn\n");
+	
 		
 		uint8_t x = ( instruction_fetched & 0x0F00 ) >> 8;
 		uint8_t y = ( instruction_fetched & 0x00F0) >> 4;
@@ -111,7 +113,7 @@ void fetch_decode_execute(struct processor* proc) {
 			read_memory(proc->ram, proc->registerI + i, &byte);
 			Sprite_add(&sprite, byte);
 		}
-		Display_DRW(proc->display, &sprite, Vx, Vy, &proc->Vx[0xF]);
+		Display_DRW(proc->display, &sprite, Vx, Vy, &proc->Vx[0xF]);;
 		Sprite_destroy(&sprite);
 		
 	}
@@ -121,18 +123,23 @@ void fetch_decode_execute(struct processor* proc) {
 	} 
 	else if ( instruction_fetched == 0x00EE) {
 		printf("00EE\n");
-		proc->counter_program = proc->stack[proc->stack_pointer];
-		proc->stack[proc->stack_pointer] -= 1;
+		if (proc->stack_pointer == 0) {
+			printf("RET WITH SP==0\n");
+		}
+		else {
+			proc->stack_pointer -= 1;
+			proc->counter_program = proc->stack[proc->stack_pointer];
+		}
 	} 
 	else if  ( (instruction_fetched & 0xF000) == 0x7000){
-		printf("7xkk");
+		printf("7xkk\n");
 		uint8_t x= ( instruction_fetched & 0x0F00) >> 8; 
 		uint16_t k= (instruction_fetched & 0x00FF) ;
 		
 		proc->Vx[x] += k;
 	} 
 	else if ( (instruction_fetched & 0xF000) == 0x3000 ) {
-		printf("3xnn");
+		printf("3xnn\n");
 		uint8_t x = (instruction_fetched & 0x0F00) >> 8;
 		uint16_t k = (instruction_fetched & 0x00FF) ;
 		if (proc->Vx[x] == k ){			proc->counter_program += 2;
@@ -140,14 +147,18 @@ void fetch_decode_execute(struct processor* proc) {
 		
 	} else if ( (instruction_fetched & 0xF000) == 0x2000 ) {
 		printf("2nnn\n");
-		
-		uint16_t n = instruction_fetched & 0x0FFF;
-		
-		proc->stack[proc->stack_pointer] = proc->counter_program;
-		proc->counter_program = n;
+		if (proc->stack_pointer == 16) {
+			printf("CALL WITH SP==16\n");
+		} else {
+			uint16_t n = instruction_fetched & 0x0FFF;
+			
+			proc->stack[proc->stack_pointer] = proc->counter_program;
+			proc->stack_pointer += 1;
+			proc->counter_program = n;
+		}
 	}
 	else if ( (instruction_fetched & 0xF000) == 0x4000 ) {
-		printf("4xnn");
+		printf("4xnn\n");
 		uint8_t x = (instruction_fetched & 0x0F00) >> 8;
 		uint16_t k = (instruction_fetched & 0x00FF) ;
 		if (proc->Vx[x] != k ){
@@ -236,17 +247,27 @@ void fetch_decode_execute(struct processor* proc) {
                 printf("8xyE\n");
                 proc->Vx[0xF] = (proc->Vx[x] & 0x80) >> 7; // recupere le bit le plus significatif et le met dans vf
                 proc->Vx[x] <<= 1;  //multiplie par deux 
+				break;
+			default:
+				printf("ERROR: 8xy?\n");
         }
     }
     else if ( (instruction_fetched & 0xF000) == 0xF000 ) {
 
-		printf("Fxnn");
+		printf("Fxnn\n");
         uint8_t x = ( instruction_fetched & 0x0F00 ) >> 8;
         uint8_t Vx = proc->Vx[x];
         
 		// We can now test all version of the instruction Fx.
         switch (instruction_fetched & 0x00FF) {
-            
+			
+			case 0X07:
+				printf("FX07\n");
+				proc->Vx[x] = proc->delay_timer;
+			case 0X12:
+				printf("FX15\n");
+				proc->delay_timer = Vx;		
+				
             case 0X55:
 				printf("FX55\n");
 				for (uint8_t i = 0; i <= x; i++) {
@@ -281,9 +302,14 @@ void fetch_decode_execute(struct processor* proc) {
 				printf("FX1E\n");
 				proc->registerI = proc->registerI + Vx;
 				break; 
+			default:
+				printf("ERROR: Fx??\n");
         }
 	}
+	else if ( (instruction_fetched & 0xF000) == 0x0000 ) {
+		printf("0nnn\n");
+	}
 	else {
-		printf("ERROR\n");
+		printf("ERROR: %u\n", instruction_fetched);
 	}
 }
