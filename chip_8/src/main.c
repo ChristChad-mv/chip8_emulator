@@ -50,8 +50,7 @@ int main() {
      */
     struct ram Ram;
     int checking = initialize_RAM(&Ram);
-	
-	write_memory(&Ram, 511, 1);
+
     if (checking == 1) {
         printf("RAM not initialized.\n");
         return 1;
@@ -84,6 +83,7 @@ int main() {
      * Initializes the processor structure.
      */
     struct processor proc;
+	
     if (initialize_processor(&proc, &Ram, &display) != 0) {
         printf("Failed to initialize processor.\n");
         delete_memory(&Ram);
@@ -93,9 +93,28 @@ int main() {
 		printf("Proc initialized successfully.\n");
 	}
 	
+	write_memory(&Ram, 0x1FF, 1);
+	Uint32 current_timer = SDL_GetTicks();
 	while(1) {
+		
+		
 		decode_execute(&proc);
 		Display_update(&display);
+		
+		Uint32 final_timer = SDL_GetTicks();
+		Uint32 time_passed = final_timer - current_timer;
+		if (time_passed >= 16) {
+			if (proc.delay_timer > 0) {
+				proc.delay_timer -= 1;
+			}
+			
+			if(proc.sound_timer > 0) {
+				proc.sound_timer -= 1;
+			}
+			
+			current_timer = SDL_GetTicks();
+		}
+		SDL_Delay(1);
 	}
     
     

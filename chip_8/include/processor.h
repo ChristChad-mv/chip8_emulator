@@ -31,12 +31,13 @@
 struct processor {
     struct ram* ram;          
     struct Display* display;   
-    uint16_t registerI;        
+    uint16_t registerI;
     int counter_program;       
     uint8_t Vx[16];
 	uint16_t stack[16];
 	int stack_pointer;
 	uint8_t delay_timer;
+	uint8_t sound_timer;
 };
 
 /**
