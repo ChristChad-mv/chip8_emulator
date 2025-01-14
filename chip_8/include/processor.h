@@ -30,7 +30,8 @@
  */
 struct processor {
     struct ram* ram;          
-    struct Display* display;   
+    struct Display* display; 
+    struct Speaker * speaker;
     uint16_t registerI;
     int counter_program;       
     uint8_t Vx[16];
@@ -38,6 +39,7 @@ struct processor {
 	int stack_pointer;
 	uint8_t delay_timer;
 	uint8_t sound_timer;
+    struct Keyboard * keyboard;
 };
 
 /**
@@ -51,7 +53,7 @@ struct processor {
  *      - 0 if successful.
  *      - 1 if failed.
  */
-int initialize_processor(struct processor * proc, struct ram* memory, struct Display * display);
+int initialize_processor(struct processor * proc, struct ram* memory, struct Display * display, struct Keyboard *keyboard,struct Speaker * speaker);
 
 /**
  * @brief Fetches, decodes, and executes the next instruction.

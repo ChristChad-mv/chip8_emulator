@@ -29,7 +29,7 @@
 #include <misc/debug.h>
 #include "ram.h"
 #include "processor.h"
-
+#include <speaker/speaker.h>
 /**
  * @brief The main function of the Chip8 emulator.
  *
@@ -60,7 +60,7 @@ int main() {
      * Load CHIP-8 program into memory.
      * Loads a binary CHIP-8 program from the specified file into RAM starting at address 512.
      */
-    const char* program_path = "/home/administrateur/Téléchargements/chip8_emulator/chip_8/5-quirks.ch8";
+    const char* program_path = "/home/administrateur/Téléchargements/chip8_emulator/chip_8/Pong\ [Paul\ Vervalin,\ 1990].ch8";
     if (load_memory(&Ram, 512, program_path) != 0) {
         printf("Failed to load program into memory.\n");
         return 1;
@@ -77,14 +77,33 @@ int main() {
     } else {
         printf("Display initialized successfully.\n");
     }
-
+    /**
+        create the keyboard
+    **/
+    struct Keyboard keyboard;
+    if (Keyboard_init(&keyboard)){
+        printf("failed to connect the keyboard");
+        return 1;
+    }else {
+        printf("keyboard integred successfully");
+    }
+    /**
+        speaker
+    **/
+    struct Speaker speaker;
+    if (Speaker_init(&speaker)){
+        printf("Failed to connect the speaker\n");
+        return 1;
+    }else {
+        printf("Speaker integred successfully");
+    }
     /**
      * Create and initialize the processor.
      * Initializes the processor structure.
      */
     struct processor proc;
 	
-    if (initialize_processor(&proc, &Ram, &display) != 0) {
+    if (initialize_processor(&proc, &Ram, &display, &keyboard,&speaker) != 0) {
         printf("Failed to initialize processor.\n");
         delete_memory(&Ram);
         return 1;
@@ -93,30 +112,34 @@ int main() {
 		printf("Proc initialized successfully.\n");
 	}
 	
-	write_memory(&Ram, 0x1FF, 1);
+
 	Uint32 current_timer = SDL_GetTicks();
+	
 	while(1) {
-		
 		
 		decode_execute(&proc);
 		Display_update(&display);
 		
 		Uint32 final_timer = SDL_GetTicks();
 		Uint32 time_passed = final_timer - current_timer;
+		printf("\n%d\n\n", proc.delay_timer);
 		if (time_passed >= 16) {
 			if (proc.delay_timer > 0) {
-				proc.delay_timer -= 1;
+				proc.delay_timer -= time_passed % 16;
 			}
 			
 			if(proc.sound_timer > 0) {
-				proc.sound_timer -= 1;
+				proc.sound_timer -= time_passed % 16;
 			}
 			
 			current_timer = SDL_GetTicks();
 		}
 		SDL_Delay(1);
+		
+		printf("%d\n\n\n", proc.delay_timer);
 	}
     
     
     return 0;
 }
+

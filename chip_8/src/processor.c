@@ -9,12 +9,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
-
+#include <speaker/speaker.h>
 #include "processor.h"
 #include "ram.h"
 #include <display/display.h>
 #include <display/sprite.h>
 #include <misc/debug.h>
+#include <keyboard/keyboard.h>
 
 /**
  * @brief Initializes the processor.
@@ -29,15 +30,16 @@
  *      - 0 if initialization is successful.
  *      - 1 if initialization fails.
  */
-int initialize_processor(struct processor * proc, struct ram* memory, struct Display * display){
+int initialize_processor(struct processor * proc, struct ram* memory, struct Display * display, struct Keyboard * keyboard ,struct Speaker * speaker){
     proc->ram = memory;
     proc->display = display; 
+    proc ->keyboard=keyboard;
     proc->registerI = 0; 
     proc->counter_program = 512;
     proc->stack_pointer = 0;
 	proc->delay_timer = 0;
 	proc->sound_timer = 0;
-	
+	proc->speaker=speaker;
 	for(int i=0; i < 16; i++) {
 		proc->Vx[i] = 0;
 		proc->stack[i] = 0;
@@ -149,7 +151,8 @@ void decode_execute(struct processor* proc) {
 		printf("3xnn\n");
 		uint8_t x = (instruction_fetched & 0x0F00) >> 8;
 		uint16_t k = (instruction_fetched & 0x00FF) ;
-		if (proc->Vx[x] == k ){			proc->counter_program += 2;
+		if (proc->Vx[x] == k ){
+			proc->counter_program += 2;
 		}
 		
 	} else if ( (instruction_fetched & 0xF000) == 0x2000 ) {
@@ -199,19 +202,22 @@ void decode_execute(struct processor* proc) {
             
             case 0x0:
                 printf("8xy0\n");
-                proc->Vx[x] = proc->Vx[y];
+                proc->Vx[x] = Vy;
                 break;
             case 0x1:
                 printf("8xy1\n");
-                proc->Vx[x] = proc->Vx[x] | proc->Vx[y];	
+                proc->Vx[x] = proc->Vx[x] | proc->Vx[y];
+                proc->Vx[0xF]=0;
                 break;
             case 0x2:
                 printf("8xy2\n");
                 proc->Vx[x] = proc->Vx[x] & proc->Vx[y];
+                proc->Vx[0xF]=0;
                 break;
             case 0x3:
                 printf("8xy3\n");
                 proc->Vx[x] = proc->Vx[x] ^ proc->Vx[y];
+                proc->Vx[0xF]=0;
                 break;
             case 0x4:
                 printf("8xy4\n");
@@ -227,21 +233,22 @@ void decode_execute(struct processor* proc) {
                 break;
             case 0x5:
                 printf("8xy5\n");
-                if (proc->Vx[x] >= Vy) {
+                if (proc->Vx[x] >= proc->Vx[y]) {
 					proc->Vx[0xF] = 1;
 				} else {
                     proc->Vx[0xF] = 0;
                 }
-                proc->Vx[x] -= Vy;
+                proc->Vx[x] -= proc->Vx[y];
                 break;
             case 0x6:
                 printf("8xy6\n");
+                proc->Vx[x]=proc->Vx[y];
                 proc->Vx[0xF] = proc->Vx[x] & (0x01);
 				proc->Vx[x] = proc->Vx[x] >> 1;
                 break;
             case 0x7:
                 printf("8xy7\n");
-                if ( proc->Vx[x] < Vy) {
+                if ( proc->Vx[x] < proc->Vx[y]) {
                     proc->Vx[0xF]= 1;
                 } else {
                     proc->Vx[0xF]=0;
@@ -251,6 +258,7 @@ void decode_execute(struct processor* proc) {
             case 0xE : 
                // inverse de 8xy6 
                 printf("8xyE\n");
+                proc->Vx[x]=proc->Vx[y];
                 proc->Vx[0xF] = (proc->Vx[x] >> 7); // recupere le bit le plus significatif et le met dans vf
 				proc->Vx[x] = proc->Vx[x] << 1;  //multiplie par deux 
 				break;
@@ -262,22 +270,31 @@ void decode_execute(struct processor* proc) {
 
 		printf("Fxnn\n");
         uint8_t x = ( instruction_fetched & 0x0F00 ) >> 8;
-        uint8_t Vx = proc->Vx[x];		
+        //uint8_t Vx = proc->Vx[x];		
         
-		// We can now test all version of the instruction Fx.
         switch (instruction_fetched & 0x00FF) {
-			
+            
+			case 0x0A : 
+                printf("FX0A\n");
+                uint8_t pressed;
+                if(Keyboard_wait(proc->keyboard, &pressed) == 1) {
+					printf("--------------");
+				}
+				proc->Vx[x]=pressed;
+                
+                break;
+
 			case 0x07:
 				printf("FX07\n");
 				proc->Vx[x] = proc->delay_timer;
 				break;
 			case 0x15:
 				printf("FX15\n");
-				proc->delay_timer = Vx;
+				proc->delay_timer = proc->Vx[x];
 				break;
 			case 0x18:
 				printf("FX18");
-				proc->sound_timer = Vx;
+				proc->sound_timer = proc->Vx[x];
 				break;
             case 0x55:
 				printf("FX55\n");
@@ -300,9 +317,9 @@ void decode_execute(struct processor* proc) {
 				 // ne marche pas !!!!!!!!!!!!!!!!!!!!!!!!!!!!
 				// on decortique l'adresse en dizaines unités et centaines et on sauvgarde dans registrI
 				// registerI+1 et I+2 d'ou l'incrementation de 3
-				uint8_t hundreds = (uint8_t)(Vx / 100);
-				uint8_t tens = (uint8_t)((Vx / 10) % 10);
-				uint8_t ones = (uint8_t)(Vx % 10);
+				uint8_t hundreds = (uint8_t)(proc->Vx[x] / 100);
+				uint8_t tens = (uint8_t)((proc->Vx[x] / 10) % 10);
+				uint8_t ones = (uint8_t)(proc->Vx[x] % 10);
 				
 				write_memory(proc->ram, proc->registerI, hundreds);
 				write_memory(proc->ram, proc->registerI+1, tens);
@@ -311,18 +328,43 @@ void decode_execute(struct processor* proc) {
 				break;
             case 0x1E : 
 				printf("FX1E\n");
-				proc->registerI = proc->registerI + Vx;
+				proc->registerI = proc->registerI + proc->Vx[x];
 				break; 
 			default:
 				printf("ERROR: Fx??\n");
         }
 	}
-	else if ( (instruction_fetched & 0xF0FF) == 0xE0A1 ) {
-		proc->counter_program += 2;
+	else if ( (instruction_fetched & 0xF000) == 0xE000 ) {
+        uint8_t x = ( instruction_fetched & 0x0F00 ) >> 8;
+        int pressed;
+        switch (instruction_fetched & 0x00FF){
+            case 0xA1 :
+                if (Keyboard_get(proc->keyboard,proc->Vx[x],&pressed) == 0 && pressed==KEY_UP) {
+                    proc->counter_program += 2;
+                }
+                break;
+            case 0x9E : 
+                if ( Keyboard_get(proc->keyboard,proc->Vx[x],&pressed) == 0 && pressed==KEY_DOWN){
+                    proc->counter_program += 2;
+                }
+                break;
+            
+            default:
+                printf("ERROR : EX?\n");
+        }
 	}
 	else if ( (instruction_fetched & 0xF000) == 0x0000 ) {
 		printf("0nnn\n");
+	} 
+    else if ( (instruction_fetched & 0xF000) == 0x9000 ) {
+		printf("9nnn\n");
+        uint8_t x=(instruction_fetched & 0x0F00) >> 8;
+        uint8_t y=(instruction_fetched & 0x00F0) >> 4;
+        if (proc->Vx[x] != proc->Vx[y]){
+            proc->counter_program +=2;
+        }
 	}
+    
 	else {
 		printf("ERROR: %u\n", instruction_fetched);
 	}
