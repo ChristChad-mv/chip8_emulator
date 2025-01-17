@@ -1,14 +1,13 @@
 /**
  * @file processor.c
  * @brief Implements the processor functions for the Chip8 emulator.
- *
+ * @Authors MERABTENE and MVOUNGOU 
  * This source file provides the definitions for initializing the processor
  * and performing the fetch-decode-execute cycle.
  */
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdbool.h>
 #include <speaker/speaker.h>
 #include "processor.h"
 #include "ram.h"
@@ -47,10 +46,9 @@ int initialize_processor(struct processor * proc, struct ram* memory, struct Dis
 	return 0;
 }
 /**
- * @brief Fetches, decodes, and executes the next instruction.
+ * @brief Reads the instruction from the RAM fitches it and then move to the next instruction
  *
- * Performs the fetch-decode-execute cycle for the processor. This function
- * should be called repeatedly in the main emulation loop.
+ * This function should be called repeatedly in the main emulation loop.
  *
  * @param proc Pointer to the processor structure.
  */
@@ -72,30 +70,37 @@ uint16_t fetch_instruction(struct processor* proc) {
 	
 	return instruction;
 } 
-
+/**
+ * @brief Decode the fetched instruction 
+ * This function is to call repeatedly in the main emulation loop.
+ * 
+ * @param proc
+ */
 void decode_execute(struct processor* proc) {
     uint16_t instruction_fetched = fetch_instruction(proc);
 	printf("%s\n", instruction_as_str(instruction_fetched));
 	
-	
+	// 6xkk Load the regiter Vx[x]  with the value of kk
 	if ((instruction_fetched & 0xF000) == 0x6000) {
 		printf("6xkk\n");
 		uint8_t x  = ( instruction_fetched & 0x0F00 ) >> 8;
 		uint8_t kk = instruction_fetched & 0x00FF;
 		proc->Vx[x] = kk;
 	}
+	// Annn Set the registerI to nnn
 	else if ( (instruction_fetched & 0xF000) == 0xA000 ) {
 		printf("Annn\n");
 		
 		uint16_t n = instruction_fetched & 0x0FFF;
 		proc->registerI=n;
 	}
+	// Bnnn jump to location n+Vx[0]
 	else if ( (instruction_fetched & 0xF000) == 0xB000 ){
 			printf("Bnnn\n");
 			uint16_t n = instruction_fetched & 0x0FFF;
 			proc->counter_program = n + proc->Vx[0];
 	}
-	
+	 // 1nnn jump to location nnn
 	else if ( (instruction_fetched & 0xF000) == 0x1000 ) {
 		printf("1nnn\n");
 		
@@ -103,6 +108,7 @@ void decode_execute(struct processor* proc) {
 		proc->counter_program = n;
 		
 	} 
+	// Dxyn Draw the sprite at coordiante (Vx[x], Vx[y] with n bytes of sprite data
 	else if ( (instruction_fetched & 0xF000) == 0xD000) {
 		printf("Dxyn\n");
 	
@@ -126,10 +132,12 @@ void decode_execute(struct processor* proc) {
 		Sprite_destroy(&sprite);
 		
 	}
+	//00E0 Clear the display 
 	else if ( instruction_fetched == 0x00E0) {
 		printf("00E0\n");
 		Display_CLS(proc->display);
 	} 
+	// 00EE returning from a subroutine (a return from calling a function)
 	else if ( instruction_fetched == 0x00EE) {
 		printf("00EE\n");
 		if (proc->stack_pointer == 0) {
@@ -140,6 +148,7 @@ void decode_execute(struct processor* proc) {
 			proc->counter_program = proc->stack[proc->stack_pointer];
 		}
 	} 
+	// 7xkk Adds the value kk to the value of register Vx[x]
 	else if  ( (instruction_fetched & 0xF000) == 0x7000){
 		printf("7xkk\n");
 		uint8_t x= ( instruction_fetched & 0x0F00) >> 8; 
@@ -147,6 +156,7 @@ void decode_execute(struct processor* proc) {
 		
 		proc->Vx[x] += k;
 	} 
+	// 3xnn increments the program_counter by 2 if Vx[x]=k
 	else if ( (instruction_fetched & 0xF000) == 0x3000 ) {
 		printf("3xnn\n");
 		uint8_t x = (instruction_fetched & 0x0F00) >> 8;
@@ -155,7 +165,9 @@ void decode_execute(struct processor* proc) {
 			proc->counter_program += 2;
 		}
 		
-	} else if ( (instruction_fetched & 0xF000) == 0x2000 ) {
+	}
+	// 2nnn call subroutine at address nnn
+	else if ( (instruction_fetched & 0xF000) == 0x2000 ) {
 		printf("2nnn\n");
 		if (proc->stack_pointer == 16) {
 			printf("CALL WITH SP==16\n");
@@ -167,6 +179,7 @@ void decode_execute(struct processor* proc) {
 			proc->counter_program = n;
 		}
 	}
+	// 4xnn if Vx[x] != k skip to the next instruction
 	else if ( (instruction_fetched & 0xF000) == 0x4000 ) {
 		printf("4xnn\n");
 		uint8_t x = (instruction_fetched & 0x0F00) >> 8;
@@ -175,6 +188,7 @@ void decode_execute(struct processor* proc) {
 			proc->counter_program += 2;
 		}
 	}
+	//5xy0 Skip next instruction if Vx[x] =Vx[y]
 	else if ( (instruction_fetched & 0xF00F) == 0x5000) {
 		printf("5xy0\n");
 
@@ -188,16 +202,16 @@ void decode_execute(struct processor* proc) {
 			proc->counter_program += 2;
 		}
 	}
+	// instructions type 8xy..
 	else if ( ( instruction_fetched & 0xF000) == 0x8000) {
 		
 		uint8_t x = ( instruction_fetched & 0x0F00 ) >> 8;
 		uint8_t y = ( instruction_fetched & 0x00F0) >> 4;
         
-		//uint8_t Vx = proc->Vx[x];
         uint8_t Vy = proc->Vx[y];
-        // pour eviter une confusion puisque la partie 8xy est la meme
-        // on utilise un case of 
-        
+		
+        // we used a switch case to avoid any confuse if use of classic if condition for 
+		// all the instructions that got the same mask
         switch (instruction_fetched & 0x000F) {
             
             case 0x0:
@@ -221,8 +235,6 @@ void decode_execute(struct processor* proc) {
                 break;
             case 0x4:
                 printf("8xy4\n");
-                //uint8_t Vf = proc->Vx[0xF]; // c'est le registre numero 15=F
- 
                 uint16_t sum = (uint16_t)proc->Vx[x] + proc->Vx[y];
                 if ( sum > 255) {
 					proc->Vx[0xF] = 1;
@@ -256,21 +268,21 @@ void decode_execute(struct processor* proc) {
                 proc->Vx[x] = proc->Vx[y] - proc->Vx[x]; 
                 break;
             case 0xE : 
-               // inverse de 8xy6 
+               // the oppsosite of 8xy6 
                 printf("8xyE\n");
                 proc->Vx[x]=proc->Vx[y];
-                proc->Vx[0xF] = (proc->Vx[x] >> 7); // recupere le bit le plus significatif et le met dans vf
-				proc->Vx[x] = proc->Vx[x] << 1;  //multiplie par deux 
+                proc->Vx[0xF] = (proc->Vx[x] >> 7);  
+				proc->Vx[x] = proc->Vx[x] << 1;    
 				break;
 			default:
 				printf("ERROR: 8xy?\n");
         }
     }
+	// instructions type Fx..
     else if ( (instruction_fetched & 0xF000) == 0xF000 ) {
 
 		printf("Fxnn\n");
         uint8_t x = ( instruction_fetched & 0x0F00 ) >> 8;
-        //uint8_t Vx = proc->Vx[x];		
         
         switch (instruction_fetched & 0x00FF) {
             
@@ -314,9 +326,7 @@ void decode_execute(struct processor* proc) {
 				break;
             case 0x33 : 
 				printf("FX33\n");
-				 // ne marche pas !!!!!!!!!!!!!!!!!!!!!!!!!!!!
-				// on decortique l'adresse en dizaines unités et centaines et on sauvgarde dans registrI
-				// registerI+1 et I+2 d'ou l'incrementation de 3
+				 
 				uint8_t hundreds = (uint8_t)(proc->Vx[x] / 100);
 				uint8_t tens = (uint8_t)((proc->Vx[x] / 10) % 10);
 				uint8_t ones = (uint8_t)(proc->Vx[x] % 10);
@@ -334,6 +344,7 @@ void decode_execute(struct processor* proc) {
 				printf("ERROR: Fx??\n");
         }
 	}
+	// instructions for the keyboard 
 	else if ( (instruction_fetched & 0xF000) == 0xE000 ) {
         uint8_t x = ( instruction_fetched & 0x0F00 ) >> 8;
         int pressed;
@@ -353,18 +364,20 @@ void decode_execute(struct processor* proc) {
                 printf("ERROR : EX?\n");
         }
 	}
+	//0nnn Jump to a machine code routine at nnn.
 	else if ( (instruction_fetched & 0xF000) == 0x0000 ) {
 		printf("0nnn\n");
 	} 
+	//9xy0 skip to the next instruction if Vx[x] !=Vx[y]
     else if ( (instruction_fetched & 0xF000) == 0x9000 ) {
-		printf("9nnn\n");
+		printf("9xy0\n");
         uint8_t x=(instruction_fetched & 0x0F00) >> 8;
         uint8_t y=(instruction_fetched & 0x00F0) >> 4;
         if (proc->Vx[x] != proc->Vx[y]){
             proc->counter_program +=2;
         }
 	}
-    
+    // for all other instruction not recognized !
 	else {
 		printf("ERROR: %u\n", instruction_fetched);
 	}

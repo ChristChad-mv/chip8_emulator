@@ -20,8 +20,9 @@
 /**
  * @file main.c
  * @brief Entry point for the Chip8 emulator.
- *
- * This file contains the main function in which we will manipulate every others functions.
+ * @author MERABTENE and MVOUNGOU
+ * @date January 2025
+ * This file contains the main function in which we will manipulate every other function.
  */
 
 #include <keyboard/keyboard.h>
@@ -37,15 +38,17 @@
  * 1. Initializes the RAM.
  * 2. Loads a CHIP-8 program into memory.
  * 3. Initializes the display.
- * 4. Initializes the processor.
- * 5. Enters the main emulation loop to fetch, decode, and execute instructions from binary file.
+ * 4. Initializes the Keyboard
+ * 5. Initializes the speaker.
+ * 6. Initializes the processor.
+ * 7. Enters the main emulation loop to fetch, decode, and execute instructions from binary file.
  *
  * @return int Returns 0 if successful execution.
  */
 int main() {
     
     /**
-     * Create and initialize RAM.
+     * Creating and initializing the RAM.
      * Initializes the RAM structure and allocates memory.
      */
     struct ram Ram;
@@ -60,7 +63,7 @@ int main() {
      * Load CHIP-8 program into memory.
      * Loads a binary CHIP-8 program from the specified file into RAM starting at address 512.
      */
-    const char* program_path = "/home/administrateur/Téléchargements/chip8_emulator/chip_8/Pong\ [Paul\ Vervalin,\ 1990].ch8";
+    const char* program_path = "/home/administrateur/Téléchargements/chip8_emulator/chip_8/Paddles.ch8";
     if (load_memory(&Ram, 512, program_path) != 0) {
         printf("Failed to load program into memory.\n");
         return 1;
@@ -71,15 +74,24 @@ int main() {
      * Initializes the display with the pixels value
      */
     struct Display display;
-    if (Display_init(&display, 10)) {
+    if (Display_init(&display, 15)) {
         printf("Failed to initialize display.\n");
         return 1; 
     } else {
         printf("Display initialized successfully.\n");
+		// personalizing the window with RGB colors  
+		uint8_t screen_r= 50, screen_g=51, screen_b=51;
+		uint8_t details_r=72,details_g=133, details_b=123;
+		if (Display_set_colors (&display, screen_r,screen_g,screen_b,details_r,details_g,details_b) !=0){
+			printf("Failed to set the display colors : %s\n", SDL_GetError());
+			return 1;
+		} else {
+			printf("Display colors set successfuly \n");
+		}
     }
     /**
-        create the keyboard
-    **/
+	 * Create and initialize the keyboard.
+     */
     struct Keyboard keyboard;
     if (Keyboard_init(&keyboard)){
         printf("failed to connect the keyboard");
@@ -88,8 +100,8 @@ int main() {
         printf("keyboard integred successfully");
     }
     /**
-        speaker
-    **/
+	 * Create and Initialize the speaker.
+     */
     struct Speaker speaker;
     if (Speaker_init(&speaker)){
         printf("Failed to connect the speaker\n");
@@ -114,7 +126,7 @@ int main() {
 	
 
 	Uint32 current_timer = SDL_GetTicks();
-	
+	 // The main emulation loop of the program 
 	while(1) {
 		
 		decode_execute(&proc);
@@ -125,11 +137,19 @@ int main() {
 		printf("\n%d\n\n", proc.delay_timer);
 		if (time_passed >= 16) {
 			if (proc.delay_timer > 0) {
-				proc.delay_timer -= time_passed % 16;
+				if (proc.delay_timer > time_passed /16) {
+					proc.delay_timer-= (time_passed / 16);
+			} else {
+				proc.delay_timer=0;
+			}
 			}
 			
-			if(proc.sound_timer > 0) {
-				proc.sound_timer -= time_passed % 16;
+			if (proc.sound_timer > 0) {
+				if (proc.sound_timer > time_passed /16) {
+					proc.sound_timer-= (time_passed / 16);
+			} else {
+				proc.sound_timer=0;
+			}
 			}
 			
 			current_timer = SDL_GetTicks();

@@ -28,7 +28,7 @@
         <IncludePath Value="./include"/>
         <IncludePath Value="./lib/libprovided/include"/>
       </Compiler>
-      <Linker Options="-lprovided -lSDL2" Required="yes">
+      <Linker Options="-lprovided -lSDL2 -lm" Required="yes">
         <LibraryPath Value="lib/libprovided/lib/x86_64"/>
       </Linker>
       <ResourceCompiler Options="" Required="no"/>
