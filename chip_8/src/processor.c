@@ -209,7 +209,7 @@ void decode_execute(struct processor* proc) {
 		uint8_t y = ( instruction_fetched & 0x00F0) >> 4;
         
         uint8_t Vy = proc->Vx[y];
-		
+		uint8_t Vx=proc->Vx[x];
         // we used a switch case to avoid any confuse if use of classic if condition for 
 		// all the instructions that got the same mask
         switch (instruction_fetched & 0x000F) {
@@ -236,43 +236,42 @@ void decode_execute(struct processor* proc) {
             case 0x4:
                 printf("8xy4\n");
                 uint16_t sum = (uint16_t)proc->Vx[x] + proc->Vx[y];
+				proc->Vx[x] = sum & 0xFF;
                 if ( sum > 255) {
 					proc->Vx[0xF] = 1;
                 } else {
                     proc->Vx[0xF] = 0;
                 }
-				proc->Vx[x] = sum & 0xFF;
                 break;
             case 0x5:
                 printf("8xy5\n");
-                if (proc->Vx[x] >= proc->Vx[y]) {
+				proc->Vx[x] = proc->Vx[x] - proc->Vx[y];
+				if( Vx >= proc->Vx[y]) {
 					proc->Vx[0xF] = 1;
 				} else {
-                    proc->Vx[0xF] = 0;
-                }
-                proc->Vx[x] -= proc->Vx[y];
+					proc->Vx[0xF] = 0;
+				}
+				
                 break;
             case 0x6:
                 printf("8xy6\n");
-                proc->Vx[x]=proc->Vx[y];
-                proc->Vx[0xF] = proc->Vx[x] & (0x01);
-				proc->Vx[x] = proc->Vx[x] >> 1;
+				proc->Vx[x] = proc->Vx[y] >> 1;
+                proc->Vx[0xF] = Vy & (0x01);
                 break;
             case 0x7:
                 printf("8xy7\n");
+                proc->Vx[x] = proc->Vx[y] - proc->Vx[x]; 
                 if ( proc->Vx[x] < proc->Vx[y]) {
                     proc->Vx[0xF]= 1;
                 } else {
                     proc->Vx[0xF]=0;
                 }
-                proc->Vx[x] = proc->Vx[y] - proc->Vx[x]; 
                 break;
             case 0xE : 
                // the oppsosite of 8xy6 
                 printf("8xyE\n");
-                proc->Vx[x]=proc->Vx[y];
-                proc->Vx[0xF] = (proc->Vx[x] >> 7);  
-				proc->Vx[x] = proc->Vx[x] << 1;    
+				proc->Vx[x] = proc->Vx[y] << 1;    
+                proc->Vx[0xF] = (Vy >> 7);  
 				break;
 			default:
 				printf("ERROR: 8xy?\n");
