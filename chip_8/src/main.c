@@ -20,140 +20,65 @@
 /**
  * @file main.c
  * @brief Entry point for the Chip8 emulator.
- * @author MERABTENE and MVOUNGOU
+ * @authors MERABTENE and MVOUNGOU
  * @date January 2025
- * This file contains the main function in which we will manipulate every other function.
+ * 
+ * This file contains the main function that initializes and controls the emulator.
  */
 
-#include <keyboard/keyboard.h>
-#include <display/display.h>
-#include <misc/debug.h>
-#include "ram.h"
-#include "processor.h"
-#include <speaker/speaker.h>
+#include "chip8machine.h"
+#include <SDL2/SDL.h>
+
 /**
  * @brief The main function of the Chip8 emulator.
  *
  * This function performs the following steps:
- * 1. Initializes the RAM.
- * 2. Loads a CHIP-8 program into memory.
- * 3. Initializes the display.
- * 4. Initializes the Keyboard
- * 5. Initializes the speaker.
- * 6. Initializes the processor.
- * 7. Enters the main emulation loop to fetch, decode, and execute instructions from binary file.
+ * 1. Initializes the Chip8 machine, which contains various components.
+ * 2. Enters the main emulation loop to fetch, decode, and execute instructions.
  *
  * @return int Returns 0 if successful execution.
  */
 int main() {
-    
-    /**
-     * Creating and initializing the RAM.
-     * Initializes the RAM structure and allocates memory.
-     */
-    struct ram Ram;
-    int checking = initialize_RAM(&Ram);
+    struct Chip8machine machine;
 
-    if (checking == 1) {
-        printf("RAM not initialized.\n");
-        return 1;
-    } 
-    
-    /**
-     * Load CHIP-8 program into memory.
-     * Loads a binary CHIP-8 program from the specified file into RAM starting at address 512.
-     */
-    const char* program_path = "/home/audrey/Documents/chip8_emulator/chip_8/6-keypad.ch8";
-    if (load_memory(&Ram, 512, program_path) != 0) {
-        printf("Failed to load program into memory.\n");
-        return 1;
-   }
-    
-    /**
-     * Create and initialize the display.
-     * Initializes the display with the pixels value
-     */
-    struct Display display;
-    if (Display_init(&display, 15)) {
-        printf("Failed to initialize display.\n");
-        return 1; 
-    } else {
-        printf("Display initialized successfully.\n");
-		// personalizing the window with RGB colors  
-		uint8_t screen_r= 50, screen_g=51, screen_b=51;
-		uint8_t details_r=72,details_g=133, details_b=123;
-		if (Display_set_colors (&display, screen_r,screen_g,screen_b,details_r,details_g,details_b) !=0){
-			printf("Failed to set the display colors : %s\n", SDL_GetError());
-			return 1;
-		} else {
-			printf("Display colors set successfuly \n");
-		}
-    }
-    /**
-	 * Create and initialize the keyboard.
-     */
-    struct Keyboard keyboard;
-    if (Keyboard_init(&keyboard)){
-        printf("failed to connect the keyboard");
-        return 1;
-    }else {
-        printf("keyboard integred successfully");
-    }
-    /**
-	 * Create and Initialize the speaker.
-     */
-    struct Speaker speaker;
-    if (Speaker_init(&speaker)){
-        printf("Failed to connect the speaker\n");
-        return 1;
-    }else {
-        printf("Speaker integred successfully");
-    }
-    /**
-     * Create and initialize the processor.
-     * Initializes the processor structure.
-     */
-    struct processor proc;
-	
-    if (initialize_processor(&proc, &Ram, &display, &keyboard,&speaker) != 0) {
-        printf("Failed to initialize processor.\n");
-        delete_memory(&Ram);
-        return 1;
-    }
-	else {
-		printf("Proc initialized successfully.\n");
-	}
+    // ROM path 
+    const char *rom_path = "/home/radiamerabtene/Téléchargements/versionfinale/chip8_emulator/chip_8/Paddles.ch8";
 
-	Uint32 current_timer = SDL_GetTicks();
-	 // The main emulation loop of the program 
-	while(1) {
-		
-		decode_execute(&proc);
-		Display_update(&display);
-		
-		Uint32 final_timer = SDL_GetTicks();
-		Uint32 time_passed = final_timer - current_timer;
-		if (time_passed >= 16) {
-			if (proc.delay_timer > 0) {
-				if (proc.delay_timer > time_passed /16) {
-					proc.delay_timer-= (time_passed / 16);
-				} else {
-					proc.delay_timer=0;
-				}
-			}
-			
-			if (proc.sound_timer > 0) {
-              proc.sound_timer--; 
-			  Speaker_on(proc.speaker);
-			} else {
-				Speaker_off(proc.speaker);
-			}
+    // Initialize the Chip8 machine
+    if (Chip8machine_create(&machine, rom_path) != 0) {
+        printf("System initialization failed\n");
+        return 1;
+    }
 
-             
-			current_timer = SDL_GetTicks();
-		}
-		SDL_Delay(1);
-	}
+    Uint32 current_timer = SDL_GetTicks();
+
+    // Main emulation loop
+    while (1) {
+        decode_execute(&machine.proc);
+        Display_update(&machine.display);
+
+        Uint32 final_timer = SDL_GetTicks();
+        Uint32 time_passed = final_timer - current_timer;
+
+        // Handle timers (delay and sound)
+        if (time_passed >= 16) {
+            if (machine.proc.delay_timer > 0) {
+                machine.proc.delay_timer = (machine.proc.delay_timer > time_passed / 16) 
+                                            ? machine.proc.delay_timer - (time_passed / 16) 
+                                            : 0;
+            }
+
+            if (machine.proc.sound_timer > 0) {
+                machine.proc.sound_timer -= time_passed / 16;
+                Speaker_on(machine.proc.speaker);
+            } else {
+                Speaker_off(machine.proc.speaker);
+            }
+
+            current_timer = SDL_GetTicks();
+        }
+
+        SDL_Delay(1);
+    }
     return 0;
 }
-
