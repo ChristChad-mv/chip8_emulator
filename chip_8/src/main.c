@@ -63,7 +63,7 @@ int main() {
      * Load CHIP-8 program into memory.
      * Loads a binary CHIP-8 program from the specified file into RAM starting at address 512.
      */
-    const char* program_path = "/home/administrateur/Téléchargements/chip8_emulator/chip_8/Paddles.ch8";
+    const char* program_path = "/home/administrateur/Téléchargements/chip8_emulator/chip_8/7-beep.ch8";
     if (load_memory(&Ram, 512, program_path) != 0) {
         printf("Failed to load program into memory.\n");
         return 1;
@@ -145,13 +145,14 @@ int main() {
 			}
 			
 			if (proc.sound_timer > 0) {
-				if (proc.sound_timer > time_passed /16) {
-					proc.sound_timer-= (time_passed / 16);
-			} else {
-				proc.sound_timer=0;
-			}
-			}
-			
+              proc.sound_timer--; 
+			  Speaker_on(proc.speaker); 
+              if (proc.sound_timer < 0){
+				   proc.sound_timer = 0; 
+				   Speaker_off(proc.speaker);
+			  }
+
+             
 			current_timer = SDL_GetTicks();
 		}
 		SDL_Delay(1);
@@ -159,7 +160,7 @@ int main() {
 		printf("%d\n\n\n", proc.delay_timer);
 	}
     
-    
+    }
     return 0;
 }
 
