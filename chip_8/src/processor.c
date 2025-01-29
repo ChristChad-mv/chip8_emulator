@@ -121,7 +121,7 @@ void decode_execute(struct processor* proc) {
 			read_memory(proc->ram, proc->registerI + i, &byte);
 			Sprite_add(&sprite, byte);
 		}
-		Display_DRW(proc->display, &sprite, Vx, Vy, &proc->Vx[0xF]);;
+		Display_DRW(proc->display, &sprite,Vx,Vy, &proc->Vx[0xF]);
 		Sprite_destroy(&sprite);
 		
 	}

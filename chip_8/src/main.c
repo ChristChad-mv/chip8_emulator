@@ -42,7 +42,7 @@ int main() {
     struct Chip8machine machine;
 
     // ROM path 
-    const char *rom_path = "/home/radiamerabtene/Téléchargements/versionfinale/chip8_emulator/chip_8/Paddles.ch8";
+    const char *rom_path = "/home/radiamerabtene/Téléchargements/versionfinale/chip8_emulator/chip_8/7-beep.ch8";
 
     // Initialize the Chip8 machine
     if (Chip8machine_create(&machine, rom_path) != 0) {
