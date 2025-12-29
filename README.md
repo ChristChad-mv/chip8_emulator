@@ -4,7 +4,7 @@
 A compact, didactic CHIP‑8 emulator project implemented in C (project structure suggests a classic C/Make setup). This repository contains source code, a set of reference CHIP‑8 ROMs, build artifacts for IDEs, and project configuration files. The implementation and tests were completed by the authors and the included test ROMs validate the emulator behavior.
 
 Status
-- Authors: Radia MERABTENE & Christ MVOUNGOU
+- Author: Christ MVOUNGOU
 - Project state: Objectives reached and test ROMs validated (see validated ROMs listed below).
 - The program exits cleanly when the window close control is used.
 
