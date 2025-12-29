@@ -104,7 +104,6 @@ License
 - No explicit license file was found in the repository root. Add a LICENSE file (MIT, Apache‑2.0, etc.) to clarify terms.
 
 Authors & acknowledgements
-- Radia MERABTENE
 - Christ MVOUNGOU
 
 Notes & next steps
